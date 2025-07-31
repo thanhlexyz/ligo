@@ -1,0 +1,4 @@
+torchvision
+pandas
+torch
+tqdm

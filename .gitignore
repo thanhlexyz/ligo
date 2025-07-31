@@ -1,0 +1,10 @@
+# Python cache
+**/__pycache__
+*.pyc
+# Virtual environment
+venv/
+venv3.10/
+# Result files
+data/
+data.tar
+data.tar.xz
