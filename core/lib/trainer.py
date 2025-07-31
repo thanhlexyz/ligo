@@ -20,7 +20,8 @@ class Trainer:
         self.optimizer = optim.Adam(self.model.parameters(), lr=args.lr)
         #
         initializer = lib.initializer.create(args)
-        initializer.init(self.model)
+        pretrain_model = self.load_pretrain()
+        initializer.init(pretrain_model, self.model)
 
     def train_epoch(self):
         loader, model, criterion, optimizer = self.train_loader, self.model, self.criterion, self.optimizer
@@ -62,5 +63,14 @@ class Trainer:
         args, model, monitor = self.args, self.model, self.monitor
         path = os.path.join(args.checkpoint_dir, f'{monitor.label}.pth')
         print('[+] saving model')
-        torch.save(self.model.state_dict(), path)
-        print(f'    - saved at {path}')
+        torch.save(self.model.to('cpu'), path)
+        print(f'    - saved to {path}')
+
+    def load_pretrain(self):
+        args, monitor = self.args, self.monitor
+        path = os.path.join(args.checkpoint_dir, f'{args.pretrain_model}.pth')
+        print('[+] loading pretrain model')
+        if os.path.exists(path):
+            model = torch.load(path, map_location=args.device)
+            print(f'    - loaded from {path}')
+            return model
