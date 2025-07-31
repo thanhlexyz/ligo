@@ -71,6 +71,6 @@ class Trainer:
         path = os.path.join(args.checkpoint_dir, f'{args.pretrain_model}.pth')
         print('[+] loading pretrain model')
         if os.path.exists(path):
-            model = torch.load(path, map_location=args.device)
+            model = torch.load(path, map_location=args.device, weights_only=False)
             print(f'    - loaded from {path}')
             return model
