@@ -33,11 +33,12 @@ class Initializer:
     def init(self, model1, model2, loader):
         # model1 (small) -> model2 (large)
         # step 1: extract pretrain
-        W1, L1 = util.decode(model1)
-        W2, L2 = util.decode(model2)
+        W1, B1 = util.decode(model1)
+        W2, B2 = util.decode(model2)
+        L1, L2 = len(W1), len(W2)
         # step 2: construct trainable depth expansion matrix
         w = util.get_depth_expansion_matrix(L1, L2)
-        A, B = util.get_width_expansion_matrices(W1, W2, L1, L2)
+        A, B = util.get_weight_width_expansion_matrices(W1, W2)
         ligo_model = LiGO(w, A, B)
         exit()
         # step 3:
