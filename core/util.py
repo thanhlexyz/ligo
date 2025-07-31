@@ -18,7 +18,7 @@ def get_args():
     # scenario
     parser.add_argument('--scenario', type=str, default='main')
     # model
-    parser.add_argument('--pretrain_model', type=str, default='fc_scratch')
+    parser.add_argument('--pretrain_model', type=str, default='fc1_scratch')
     parser.add_argument('--model', type=str, default='fc2')
     # initializer
     parser.add_argument('--initializer', type=str, default='scratch')

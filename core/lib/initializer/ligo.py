@@ -38,7 +38,9 @@ class LiGO(nn.Module):
             # store
             W1_.append(w1_); B1_.append(b1_)
         # depth expansion
-        exit()
+        W2, B2 = [], []
+        for l in range(L2):
+            pass
         return W2, B2
 
 class Initializer:
