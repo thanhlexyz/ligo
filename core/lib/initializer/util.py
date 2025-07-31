@@ -1,5 +1,7 @@
 import torch.nn as nn
+import numpy as np
 import torch
+import re
 
 def get_parameter_by_name(model, parameter_name, get_module=False):
     if get_module:
@@ -14,6 +16,9 @@ def get_parameter_by_name(model, parameter_name, get_module=False):
             if name == parameter_name:
                 return param
         return None
+
+def get_model_size(model):
+    return sum(p.numel() for p in model.parameters())
 
 def decode(model):
     # initialize
@@ -31,15 +36,27 @@ def decode(model):
     return W, B
 
 def encode(W, B, model):
-    for i, p in enumerate(model.parameter()):
-        # p.data.copy_(w.reshape(p))
-        if i % 2 == 0:
-            p.data.copy_(W[i // 2])
+    print(f'[+] encoding model:')
+    for name, _ in model.named_parameters():
+        layer_type = re.findall(r'[a-z]+', name.split('.')[0])[0]
+        layer_id = int(re.findall(r'\d+', name.split('.')[0])[0]) - 1
+        param_type = name.split('.')[1]
+        if layer_type == 'fc':
+            if param_type == 'weight':
+                model.state_dict()[name] = W[layer_id]
+                print(W[layer_id].requires_grad, model.state_dict()[name].requires_grad)
+            elif param_type == 'bias':
+                model.state_dict()[name] = B[layer_id]
+                print(B[layer_id].requires_grad, model.state_dict()[name].requires_grad)
+            else:
+                raise NotImplementedError
         else:
-            p.data.copy_(B[i // 2])
+            raise NotImplementedError
+    exit()
+    return model
 
 def get_depth_expansion_matrix(L1, L2):
-    return nn.Parameter(torch.zeros(L2, L1))
+    return nn.Parameter(torch.rand(L2, L1) / L1)
 
 def get_weight_dimension(W1, W2):
     L1, L2 = len(W1), len(W2)
@@ -62,8 +79,6 @@ def get_weight_width_expansion_matrices(W1, W2):
     for l in range(L1):
         a = nn.Parameter(torch.zeros(D_in[l], D1_in[l]))
         b = nn.Parameter(torch.zeros(D_out[l], D1_out[l]))
-        # w1 = W1[l]
-        # print(f'{l=} {b.shape=} {w1.shape=} {a.shape=}')
         A.append(a); B.append(b)
     return A, B
 
