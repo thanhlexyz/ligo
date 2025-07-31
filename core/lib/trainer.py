@@ -18,16 +18,18 @@ class Trainer:
         self.model = lib.model.create(args)
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = optim.Adam(self.model.parameters(), lr=args.lr)
-        #
+        # weights transfer
         initializer = lib.initializer.create(args)
         pretrain_model = self.load_pretrain()
-        initializer.init(pretrain_model, self.model)
+        initializer.init(pretrain_model, self.model, self.train_loader)
 
     def train_epoch(self):
-        loader, model, criterion, optimizer = self.train_loader, self.model, self.criterion, self.optimizer
+        loader, model, criterion, optimizer, args = self.train_loader, self.model, self.criterion, self.optimizer, self.args
         model.train()
         losses = []
         for x, y in loader:
+            x = x.to(args.device)
+            y = y.to(args.device)
             optimizer.zero_grad()
             y_hat = model(x)
             loss = criterion(y_hat, y)
@@ -38,11 +40,13 @@ class Trainer:
         return info
 
     def test_epoch(self):
-        loader, model = self.test_loader, self.model
+        loader, model, args = self.test_loader, self.model, self.args
         model.eval()
         correct = total = 0
         with torch.no_grad():
             for x, y in loader:
+                x = x.to(args.device)
+                y = y.to(args.device)
                 y_hat = model(x)
                 _, y_pred = torch.max(y_hat.data, 1)
                 total += y_pred.size(0)

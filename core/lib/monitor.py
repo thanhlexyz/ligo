@@ -5,7 +5,7 @@ import tqdm
 import os
 
 def get_label(args):
-    return f'{args.initializer}'
+    return f'{args.model}_{args.initializer}'
 
 def create(args):
     return Monitor(args)
