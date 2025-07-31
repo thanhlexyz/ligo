@@ -6,16 +6,18 @@ from . import util
 
 class LiGO(nn.Module):
 
-    def __init__(self, w, A, B):
+    def __init__(self, w, A_weight, B_weight, B_bias):
         super().__init__()
         self.w = w
-        self.A = A
-        self.B = B
-        self.L2, self.L1 = w.shape
-        for i, a in enumerate(A):
-            self.register_parameter(f'a_{i}', a)
-        for i, b in enumerate(B):
-            self.register_parameter(f'b_{i}', b)
+        self.A_weight = A_weight
+        self.B_weight = B_weight
+        self.B_bias = B_bias
+        for i, a in enumerate(A_weight):
+            self.register_parameter(f'a_weight_{i}', a)
+        for i, b in enumerate(B_weight):
+            self.register_parameter(f'b_weight_{i}', b)
+        for i, b in enumerate(B_bias):
+            self.register_parameter(f'b_weight_{i}', b)
 
     def forward(self, W1):
         # extract args
@@ -38,8 +40,9 @@ class Initializer:
         L1, L2 = len(W1), len(W2)
         # step 2: construct trainable depth expansion matrix
         w = util.get_depth_expansion_matrix(L1, L2)
-        A, B = util.get_weight_width_expansion_matrices(W1, W2)
-        ligo_model = LiGO(w, A, B)
+        A_weight, B_weight = util.get_weight_width_expansion_matrices(W1, W2)
+        B_bias = util.get_bias_width_expansion_matrices(B1, B2)
+        ligo_model = LiGO(w, A_weight, B_weight, B_bias)
         exit()
         # step 3:
         # optimize expansion matrices

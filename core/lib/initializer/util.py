@@ -45,7 +45,6 @@ def get_weight_dimension(W1, W2):
         if l <= L2-2: # expansion, L2 > L1
             D_in.append(W2[l].shape[1]); D_out.append(W2[l].shape[0])
         else: # rarely use, contraction, L2 < L1
-            D.append(len(W2[L2-2]))
             D_in.append(W2[L2-2].shape[1]); D_out.append(W2[L2-2].shape[0])
     D_in.append(W2[-1].shape[1]); D_out.append(W2[-1].shape[0])
     D1_in, D1_out = [_.shape[1] for _ in W1], [_.shape[0] for _ in W1]
@@ -59,10 +58,30 @@ def get_weight_width_expansion_matrices(W1, W2):
     for l in range(L1):
         a = nn.Parameter(torch.zeros(D_in[l], D1_in[l]))
         b = nn.Parameter(torch.zeros(D_out[l], D1_out[l]))
-        w1 = W1[l]
-        print(f'{l=} {b.shape=} {w1.shape=} {a.shape=}')
+        # w1 = W1[l]
+        # print(f'{l=} {b.shape=} {w1.shape=} {a.shape=}')
         A.append(a); B.append(b)
     return A, B
 
-def get_bias_width_expansion_matrices(W1, W2):
-    raise NotImplementedError
+def get_bias_dimension(B1, B2):
+    L1, L2 = len(B1), len(B2)
+    D, D1, D2 = [], [], []
+    D.append(B2[0].shape[0])
+    for l in range(1, L1-1):
+        if l <= L2-2: # expansion, L2 > L1
+            D.append(B2[l].shape[0])
+        else: # rarely use, contraction, L2 < L1
+            D.append(B2[L2-2].shape[0])
+    D.append(B2[-1].shape[0])
+    D1 = [_.shape[0] for _ in B1]
+    D2 = [_.shape[0] for _ in B2]
+    return D1, D, D2
+
+def get_bias_width_expansion_matrices(B1, B2):
+    D1, D, D2 = get_bias_dimension(B1, B2)
+    B = []
+    L1, L2 = len(B1), len(B2)
+    for l in range(L1):
+        b = nn.Parameter(torch.zeros(D[l], D1[l]))
+        B.append(b)
+    return B
