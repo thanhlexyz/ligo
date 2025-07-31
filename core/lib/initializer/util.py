@@ -30,9 +30,13 @@ def decode(model):
             raise NotImplementedError
     return W, B
 
-def encode(W, model):
-    for w, p in zip(W, model.parameter()):
-        p.data.copy_(w.reshape(p))
+def encode(W, B, model):
+    for i, p in enumerate(model.parameter()):
+        # p.data.copy_(w.reshape(p))
+        if i % 2 == 0:
+            p.data.copy_(W[i // 2])
+        else:
+            p.data.copy_(B[i // 2])
 
 def get_depth_expansion_matrix(L1, L2):
     return nn.Parameter(torch.zeros(L2, L1))
