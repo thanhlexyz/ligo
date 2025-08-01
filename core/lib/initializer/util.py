@@ -75,6 +75,7 @@ def get_weight_width_expansion_matrices(W1, W2):
     A, B = [], []
     L1, L2 = len(W1), len(W2)
     for l in range(L1):
+        # TODO: may be the diag should be 1's initially
         a = nn.Parameter(torch.zeros(D_in[l], D1_in[l]))
         b = nn.Parameter(torch.zeros(D_out[l], D1_out[l]))
         A.append(a); B.append(b)
@@ -99,6 +100,7 @@ def get_bias_width_expansion_matrices(B1, B2):
     B = []
     L1, L2 = len(B1), len(B2)
     for l in range(L1):
+        # TODO: may be the diag should be 1's initially
         b = nn.Parameter(torch.zeros(D[l], D1[l]))
         B.append(b)
     return B
