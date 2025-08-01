@@ -37,23 +37,21 @@ def decode(model):
 
 def encode(W, B, model):
     print(f'[+] encoding model:')
-    for name, _ in model.named_parameters():
-        layer_type = re.findall(r'[a-z]+', name.split('.')[0])[0]
-        layer_id = int(re.findall(r'\d+', name.split('.')[0])[0]) - 1
-        param_type = name.split('.')[1]
-        if layer_type == 'fc':
-            if param_type == 'weight':
-                model.state_dict()[name] = W[layer_id]
-                print(W[layer_id].requires_grad, model.state_dict()[name].requires_grad)
-            elif param_type == 'bias':
-                model.state_dict()[name] = B[layer_id]
-                print(B[layer_id].requires_grad, model.state_dict()[name].requires_grad)
-            else:
-                raise NotImplementedError
-        else:
-            raise NotImplementedError
-    exit()
+    for name, module in model.named_modules():
+        for i, layer in enumerate(module.children()):
+            # print(name, layer, layer.weight.shape, W[i].shape, layer.bias.shape, B[i].shape)
+            layer.weight = torch.nn.Parameter(W[i])
+            layer.bias = torch.nn.Parameter(B[i])
     return model
+
+def forward(x, W, B, model):
+    # TODO: follow model definition more
+    L = len(W)
+    x = x.reshape(x.shape[0], -1)
+    for l in range(L-1):
+        x = torch.nn.functional.relu(x @ W[l].T + B[l])
+    x = x @ W[L-1].T + B[L-1]
+    return x
 
 def get_depth_expansion_matrix(L1, L2):
     return nn.Parameter(torch.rand(L2, L1) / L1)

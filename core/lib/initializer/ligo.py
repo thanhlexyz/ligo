@@ -9,25 +9,22 @@ class LiGO(nn.Module):
     def __init__(self, w, A_weight, B_weight, B_bias):
         super().__init__()
         self.w = w
-        self.A_weight = A_weight
-        self.B_weight = B_weight
-        self.B_bias = B_bias
         for i, a in enumerate(A_weight):
-            self.register_parameter(f'a_weight_{i}', a)
+            self.register_parameter(f'a_w_{i}', a)
         for i, b in enumerate(B_weight):
-            self.register_parameter(f'b_weight_{i}', b)
+            self.register_parameter(f'b_w_{i}', b)
         for i, b in enumerate(B_bias):
-            self.register_parameter(f'b_bias_{i}', b)
+            self.register_parameter(f'b_b_{i}', b)
 
     def forward(self, W1, B1, W20, B20):
         # extract args
         L2, L1 = self.w.shape
-        w, A_weight, B_weight, B_bias = self.w, self.A_weight, self.B_weight, self.B_bias
+        w = getattr(self, 'w')
         # width expansion
         W1_, B1_ = [], []
         for l1 in range(L1):
             # extract linear transformation
-            a_w, b_w, b_b = A_weight[l1], B_weight[l1], B_bias[l1]
+            a_w, b_w, b_b = getattr(self, f'a_w_{l1}'), getattr(self, f'b_w_{l1}'), getattr(self, f'b_b_{l1}')
             # extract input
             w1, b1 = W1[l1], B1[l1]
             # weight width expansion
@@ -45,6 +42,7 @@ class LiGO(nn.Module):
             for l1 in range(L1):
                 w1_, b1_ = W1_[l1], B1[l1]
                 if w1_.shape == w20.shape:
+                    # print(f'{l1=}->{l2=}')
                     w2 += w[l2, l1] * w1_[l1]
                 if b1_.shape == b20.shape:
                     b2 += w[l2, l1] * b1_[l1]
@@ -77,16 +75,16 @@ class Initializer:
         print(f'    - {util.get_model_size(ligo_model)=}')
         criterion = nn.MSELoss()
         optimizer = optim.Adam(ligo_model.parameters(), lr=args.lr)
+        for name, p in ligo_model.named_parameters():
+            print(name, p.shape)
+        exit()
         for i, (x, _) in enumerate(loader):
             optimizer.zero_grad()
             W2, B2 = ligo_model(W1, B1, W20, B20)
-            util.encode(W2, B2, model2)
             x = x.to(args.device)
-            loss = criterion(model2(x), model1(x))
+            loss = criterion(util.forward(x, W2, B2, model2), model1(x))
             loss.backward()
+            # print(ligo_model.w.grad)
             optimizer.step()
-            print(f'    - {i=} {loss.item()=:0.6f}')
-            print(ligo_model.w)
-            print()
         exit()
         return model2
