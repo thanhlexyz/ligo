@@ -10,17 +10,17 @@ class LiGO(nn.Module):
         super().__init__()
         w = nn.Parameter(torch.rand(L2, L1) / L1)
         self.register_parameter('w', w)
-        
+
         A_weight, B_weight = util.get_weight_width_expansion_matrices(W1, W20)
         B_bias = util.get_bias_width_expansion_matrices(B1, B20)
-        
+
         for i, a in enumerate(A_weight):
             self.register_parameter(f'a_w_{i}', a)
         for i, b in enumerate(B_weight):
             self.register_parameter(f'b_w_{i}', b)
         for i, b in enumerate(B_bias):
             self.register_parameter(f'b_b_{i}', b)
-            
+
     def print_trainable_parameters(self):
         for name, p in self.named_parameters():
             print(name, p.mean().item())
@@ -57,8 +57,8 @@ class LiGO(nn.Module):
                     # print(f'Bias: {l1=}->{l2=}, shapes match: {b1_.shape}')
                     b2 += w[l2, l1] * b1_
             W2.append(w2); B2.append(b2)
-            
-            
+
+
         x = x.reshape(x.shape[0], -1)
         for l in range(L2-1):
             x = torch.nn.functional.relu(x @ W2[l].T + B2[l])
@@ -90,7 +90,7 @@ class Initializer:
         optimizer = optim.Adam(ligo_model.parameters(), lr=args.lr)
         # for name, p in ligo_model.named_parameters():
             # print(name, p.shape)
-        for epoch in range(20):
+        for epoch in range(30):
             for i, (x, _) in enumerate(loader):
                 optimizer.zero_grad()
                 x = x.to(args.device)
