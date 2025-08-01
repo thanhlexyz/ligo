@@ -39,9 +39,9 @@ def encode(W, B, model):
     print(f'[+] encoding model:')
     for name, module in model.named_modules():
         for i, layer in enumerate(module.children()):
-            # print(name, layer, layer.weight.shape, W[i].shape, layer.bias.shape, B[i].shape)
-            layer.weight = torch.nn.Parameter(W[i])
-            layer.bias = torch.nn.Parameter(B[i])
+            # Copy final weights without gradients - LiGO training is complete
+            layer.weight.data.copy_(W[i].data.detach())
+            layer.bias.data.copy_(B[i].data.detach())
     return model
 
 def forward(x, W, B, model):
@@ -75,9 +75,15 @@ def get_weight_width_expansion_matrices(W1, W2):
     A, B = [], []
     L1, L2 = len(W1), len(W2)
     for l in range(L1):
-        # TODO: may be the diag should be 1's initially
+        # Initialize with diagonal 1's for identity-like transformation
         a = nn.Parameter(torch.zeros(D_in[l], D1_in[l]))
+        min_dim_a = min(D_in[l], D1_in[l])
+        a.data[:min_dim_a, :min_dim_a] = torch.eye(min_dim_a)
+        
         b = nn.Parameter(torch.zeros(D_out[l], D1_out[l]))
+        min_dim_b = min(D_out[l], D1_out[l])
+        b.data[:min_dim_b, :min_dim_b] = torch.eye(min_dim_b)
+        
         A.append(a); B.append(b)
     return A, B
 
@@ -100,7 +106,9 @@ def get_bias_width_expansion_matrices(B1, B2):
     B = []
     L1, L2 = len(B1), len(B2)
     for l in range(L1):
-        # TODO: may be the diag should be 1's initially
+        # Initialize with diagonal 1's for identity-like transformation
         b = nn.Parameter(torch.zeros(D[l], D1[l]))
+        min_dim = min(D[l], D1[l])
+        b.data[:min_dim, :min_dim] = torch.eye(min_dim)
         B.append(b)
     return B
