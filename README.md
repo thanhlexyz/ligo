@@ -10,8 +10,15 @@ pip3 install -r requirements
 cd core
 ```
 
-### Training
-Training with different zero-shot weight transfer methods
+### Running
+
+- Train a small model from scratch
 ```bash
-make
+cd core/
+python3 main.py --model=fc1 --initializer=scratch
+```
+
+- Training deeper and wider model, with zero-shot weight transfer initialization
+```bash
+python3 main.py --model=fc2 --initializer=ligo --pretrain_model=fc1_scratch
 ```

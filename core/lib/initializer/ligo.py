@@ -58,7 +58,6 @@ class LiGO(nn.Module):
                     b2 += w[l2, l1] * b1_
             W2.append(w2); B2.append(b2)
 
-
         x = x.reshape(x.shape[0], -1)
         for l in range(L2-1):
             x = torch.nn.functional.relu(x @ W2[l].T + B2[l])
@@ -86,23 +85,23 @@ class Initializer:
         # optimize expansion matrices
         print('[+] optimize LiGO weight transfer matrices')
         print(f'    - {util.get_model_size(ligo_model)=}')
-        criterion = nn.MSELoss()
+        criterion = nn.CrossEntropyLoss()
         optimizer = optim.Adam(ligo_model.parameters(), lr=args.lr)
         # for name, p in ligo_model.named_parameters():
             # print(name, p.shape)
-        for epoch in range(30):
+        for epoch in range(10):
             for i, (x, _) in enumerate(loader):
                 optimizer.zero_grad()
                 x = x.to(args.device)
-                x_hat, W2, B2 = ligo_model(x, W1, B1, W20, B20)
-                y_hat = model1(x).detach()
-                loss = criterion(x_hat, y_hat)
+                y_hat, W2, B2 = ligo_model(x, W1, B1, W20, B20)
+                y = torch.max(model1(x).detach().data, 1)[1]
+                loss = criterion(y_hat, y)
                 loss.backward()
                 # print(ligo_model.w.grad)
                 optimizer.step()
                 # ligo_model.print_trainable_parameters()
                 # if i > 2:
                 #     break
-            print(f'{epoch=} {loss.item()=:0.6f}')
+            print(f'    - {epoch=} {loss.item()=:0.6f}')
         util.encode(W2, B2, model2)
         return model2
