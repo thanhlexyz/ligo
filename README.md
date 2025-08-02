@@ -22,3 +22,5 @@ python3 main.py --model=fc1 --initializer=scratch
 ```bash
 python3 main.py --model=fc2 --initializer=ligo --pretrain_model=fc1_scratch
 ```
+
+- The main implementation is in [`ligo.py`](./core/lib/initializer/ligo.py)
