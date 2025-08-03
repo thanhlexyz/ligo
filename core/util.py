@@ -23,8 +23,8 @@ def get_args():
     # initializer
     parser.add_argument('--initializer', type=str, default='scratch')
     # training
-    parser.add_argument('--batch_size', type=int, default=1000)
-    parser.add_argument('--n_epoch', type=int, default=10)
+    parser.add_argument('--batch_size', type=int, default=128)
+    parser.add_argument('--n_epoch', type=int, default=30)
     parser.add_argument('--lr', type=float, default=3e-4)
     # data directory
     parser.add_argument('--checkpoint_dir', type=str, default=f'../data/checkpoint')

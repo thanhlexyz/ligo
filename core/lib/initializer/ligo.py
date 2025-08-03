@@ -89,7 +89,7 @@ class Initializer:
         optimizer = optim.Adam(ligo_model.parameters(), lr=args.lr)
         # for name, p in ligo_model.named_parameters():
             # print(name, p.shape)
-        for epoch in range(10):
+        for epoch in range(args.n_epoch):
             for i, (x, _) in enumerate(loader):
                 optimizer.zero_grad()
                 x = x.to(args.device)
